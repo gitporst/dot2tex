@@ -218,7 +218,7 @@ class DotConvBase(object):
         self.body = ""
         if options.get('templatefile', ''):
             self.load_template(options['templatefile'])
-        if options.get('template', ''):
+        elif options.get('template', ''):
             self.template = options['template']
 
         self.options = options or {}
