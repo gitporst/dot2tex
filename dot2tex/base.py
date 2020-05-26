@@ -3,7 +3,7 @@ import os
 import re
 import sys
 import tempfile
-from subprocess import Popen, PIPE
+from subprocess import Popen, PIPE, TimeoutExpired
 
 from . import dotparsing
 from .utils import nsplit, chunks, escape_texchars, smart_float, replace_tags, is_multiline_label
@@ -46,14 +46,9 @@ def create_xdot(dotdata, prog='dot', options=''):
     cmd = progpath + ' -T' + output_format + ' ' + options + ' ' + tmp_name
     log.debug('Creating xdot data with: %s', cmd)
     p = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE, close_fds=(sys.platform != 'win32'))
-    (stdout, stderr) = (p.stdout, p.stderr)
     try:
-        data = stdout.read()
-    finally:
-        stdout.close()
-
-    try:
-        error_data = stderr.read()
+        data, error_data = p.communicate(timeout=15)
+        log.debug("stdout from latex\n %s", data)
         if error_data:
             if b'Error:' in error_data:
                 log.error("Graphviz returned with the following message: %s", error_data)
@@ -61,10 +56,8 @@ def create_xdot(dotdata, prog='dot', options=''):
                 # Graphviz raises a lot of warnings about too small labels,
                 # we therefore log them using log.debug to "hide" them
                 log.debug('Graphviz STDERR %s', error_data)
-    finally:
-        stderr.close()
-    p.kill()
-    p.wait()
+    except TimeoutExpired:
+        p.kill()
 
     os.unlink(tmp_name)
     return data
@@ -1036,21 +1029,13 @@ class TeXDimProc:
         log.debug('Running command: %s' % command)
 
         p = Popen(command, shell=True, stdout=PIPE, stderr=PIPE, close_fds=(sys.platform != 'win32'))
-        (stdout, stderr) = (p.stdout, p.stderr)
         try:
-            data = stdout.read()
+            data, error_data = p.communicate(timeout=15)
             log.debug("stdout from latex\n %s", data)
-        finally:
-            stdout.close()
-
-        try:
-            error_data = stderr.read()
             if error_data:
                 log.debug('latex STDERR %s', error_data)
-        finally:
-            stderr.close()
-        p.kill()
-        p.wait()
+        except TimeoutExpired:
+            p.kill()
 
         with open(logfilename, 'r') as f:
             logdata = f.read()
