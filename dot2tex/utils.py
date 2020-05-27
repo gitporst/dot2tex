@@ -2,9 +2,9 @@ from . import dotparsing
 
 # Inch to bp conversion factor
 INCH2BP = 72.0
-SPECIAL_CHARS = ['$', '\\', '%', '_', '#', '{', r'}', '^', '&']
+SPECIAL_CHARS = ['$', '\\', '%', '_', '#', '{', r'}', '^', '&', '\n']
 SPECIAL_CHARS_REPLACE = [r'\$', r'$\backslash$', r'\%', r'\_', r'\#',
-                         r'\{', r'\}', r'\^{}', r'\&']
+                         r'\{', r'\}', r'\^{}', r'\&', r'\\']
 charmap = dict(zip(SPECIAL_CHARS, SPECIAL_CHARS_REPLACE))
 
 
