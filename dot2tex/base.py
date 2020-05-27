@@ -645,7 +645,7 @@ class DotConvBase(object):
         tmp = template
         for flag in TEMPLATE_FLAGS:
             # TODO: clarify if the underscores are really needed, they do not appear in the docs
-            r = re.compile('<<start[_]?{}section>>(.*?)<<end[_]?{}section>>'.format(flag),
+            r = re.compile('<<start[_]?{0:}section>>(.*?)<<end[_]?{0:}section>>'.format(flag),
                            re.DOTALL | re.MULTILINE)
             if not self.dopreproc and self.options.get(flag):
                 # options specified to return only one relevant part
