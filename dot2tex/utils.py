@@ -2,9 +2,8 @@ from . import dotparsing
 
 # Inch to bp conversion factor
 INCH2BP = 72.0
-SPECIAL_CHARS = ['$', '\\', '%', '_', '#', '{', r'}', '^', '&', '\n']
-SPECIAL_CHARS_REPLACE = [r'\$', r'$\backslash$', r'\%', r'\_', r'\#',
-                         r'\{', r'\}', r'\^{}', r'\&', r'\\']
+SPECIAL_CHARS = ['$', '\\', '%', '_', '#', '{', r'}', '^', '&']
+SPECIAL_CHARS_REPLACE = [r'\$', r'\\', r'\%', r'\_', r'\#', r'\{', r'\}', r'\^{}', r'\&']
 charmap = dict(zip(SPECIAL_CHARS, SPECIAL_CHARS_REPLACE))
 
 
@@ -22,7 +21,7 @@ def escape_texchars(string):
     >>> escape_texchars('10%')
     '10\\%'
     >>> escape_texchars('%{}_^\\$')
-    '\\%\\{\\}\\_\\^{}$\\backslash$\\$'
+    '\\%\\{\\}\\_\\^{}\\\\\$'
     """
     return "".join([charmap.get(c, c) for c in string])
 
