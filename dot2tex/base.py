@@ -18,6 +18,7 @@ DEFAULT_LABEL_XMARGIN = 0.11
 DEFAULT_LABEL_YMARGIN = 0.055
 DEFAULT_EDGELABEL_XMARGIN = 0.01
 DEFAULT_EDGELABEL_YMARGIN = 0.01
+TEMPLATE_FLAGS = ['codeonly', 'figonly']
 
 
 def create_xdot(dotdata, prog='dot', options=''):
@@ -641,23 +642,18 @@ class DotConvBase(object):
 
     def clean_template(self, template):
         """Remove preprocsection or outputsection"""
-        if not self.dopreproc and self.options.get('codeonly'):
-            r = re.compile('<<startcodeonlysection>>(.*?)<<endcodeonlysection>>',
+        tmp = template
+        for flag in TEMPLATE_FLAGS:
+            # TODO: clarify if the underscores are really needed, they do not appear in the docs
+            r = re.compile('<<start[_]?{}section>>(.*?)<<end[_]?{}section>>'.format(flag),
                            re.DOTALL | re.MULTILINE)
-            m = r.search(template)
-            if m:
-                return m.group(1).strip()
-        if not self.dopreproc and self.options.get('figonly'):
-            r = re.compile('<<start_figonlysection>>(.*?)<<end_figonlysection>>',
-                           re.DOTALL | re.MULTILINE)
-            m = r.search(template)
-            if m:
-                return m.group(1)
-            r = re.compile('<<startfigonlysection>>(.*?)<<endfigonlysection>>',
-                           re.DOTALL | re.MULTILINE)
-            m = r.search(template)
-            if m:
-                return m.group(1)
+            if not self.dopreproc and self.options.get(flag):
+                # options specified to return only one relevant part
+                m = r.search(tmp)
+                if m:
+                    return m.group(1).strip()
+            # remove codeonly and figonly section
+            tmp = r.sub('', tmp)
 
         if self.dopreproc:
             r = re.compile('<<startoutputsection>>.*?<<endoutputsection>>',
@@ -665,13 +661,6 @@ class DotConvBase(object):
         else:
             r = re.compile('<<startpreprocsection>>.*?<<endpreprocsection>>',
                            re.DOTALL | re.MULTILINE)
-            # remove codeonly and figonly section
-        r2 = re.compile('<<start_figonlysection>>.*?<<end_figonlysection>>',
-                        re.DOTALL | re.MULTILINE)
-        tmp = r2.sub('', template)
-        r2 = re.compile('<<startcodeonlysection>>.*?<<endcodeonlysection>>',
-                        re.DOTALL | re.MULTILINE)
-        tmp = r2.sub('', tmp)
         return r.sub('', tmp)
 
     def init_template_vars(self):
